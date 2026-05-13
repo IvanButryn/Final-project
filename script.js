@@ -46,14 +46,7 @@ taskContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("main-content__task-card-delete-btn")) {
     e.target.closest(".main-content__task-card").remove();
   }
-});
-
-const checkboxes = document.querySelectorAll(
-  ".main-content__task-card-checkbox",
-);
-
-checkboxes.forEach((checkbox) => {
-  checkbox.addEventListener("change", (e) => {
+  if (e.target.classList.contains("main-content__task-card-checkbox")) {
     const taskCard = e.target.closest(".main-content__task-card");
 
     if (e.target.checked) {
@@ -61,5 +54,5 @@ checkboxes.forEach((checkbox) => {
     } else {
       taskCard.classList.remove("main-content__task-card--completed");
     }
-  });
+  }
 });
