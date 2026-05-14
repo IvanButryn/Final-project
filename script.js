@@ -2,6 +2,8 @@ const taskInput = document.querySelector(".main-content__task-input");
 const addTaskBtn = document.getElementById("add-task-btn");
 const taskContainer = document.querySelector(".main-content__tasks-container");
 
+
+// Adding tasks functionality
 addTaskBtn.addEventListener("click", () => {
   const taskCard = document.createElement("div");
   taskCard.classList.add("main-content__task-card");
@@ -39,6 +41,8 @@ addTaskBtn.addEventListener("click", () => {
 
   taskContainer.appendChild(taskCard);
 
+  applyFilter(filter.value);
+
   taskInput.value = "";
 });
 
@@ -55,4 +59,36 @@ taskContainer.addEventListener("click", (e) => {
       taskCard.classList.remove("main-content__task-card--completed");
     }
   }
+});
+
+// FILTERING FUNCTIONALITY
+
+const filter = document.querySelector(".main-content__filter-select");
+
+function applyFilter(value) {
+  const tasks = document.querySelectorAll(".main-content__task-card");
+
+  tasks.forEach((taskCard) => {
+    let shouldShow = true;
+
+    if (
+      value === "Completed" &&
+      !taskCard.classList.contains("main-content__task-card--completed")
+    ) {
+      shouldShow = false;
+    }
+
+    if (
+      value === "Active" &&
+      taskCard.classList.contains("main-content__task-card--completed")
+    ) {
+      shouldShow = false;
+    }
+
+    taskCard.style.display = shouldShow ? "flex" : "none";
+  });
+}
+
+filter.addEventListener("change", (e) => {
+  applyFilter(e.target.value);
 });
