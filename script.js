@@ -2,6 +2,8 @@ const taskInput = document.querySelector(".main-content__task-input");
 const addTaskBtn = document.getElementById("add-task-btn");
 const taskContainer = document.querySelector(".main-content__tasks-container");
 
+const filter = document.querySelector(".main-content__filter-select");
+const searchInput = document.querySelector(".main-content__search-input");
 
 // Adding tasks functionality
 addTaskBtn.addEventListener("click", () => {
@@ -41,7 +43,8 @@ addTaskBtn.addEventListener("click", () => {
 
   taskContainer.appendChild(taskCard);
 
-  applyFilter(filter.value);
+  applyFilters();
+  updateProgress();
 
   taskInput.value = "";
 });
@@ -49,7 +52,10 @@ addTaskBtn.addEventListener("click", () => {
 taskContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("main-content__task-card-delete-btn")) {
     e.target.closest(".main-content__task-card").remove();
+    applyFilters();
+    updateProgress();
   }
+
   if (e.target.classList.contains("main-content__task-card-checkbox")) {
     const taskCard = e.target.closest(".main-content__task-card");
 
@@ -58,37 +64,80 @@ taskContainer.addEventListener("click", (e) => {
     } else {
       taskCard.classList.remove("main-content__task-card--completed");
     }
+
+    applyFilters();
+    updateProgress();
   }
 });
 
-// FILTERING FUNCTIONALITY
 
-const filter = document.querySelector(".main-content__filter-select");
+// FILTER + SEARCH TOGETHER
+function applyFilters() {
+  const searchValue = searchInput.value.toLowerCase();
+  const filterValue = filter.value;
 
-function applyFilter(value) {
   const tasks = document.querySelectorAll(".main-content__task-card");
 
-  tasks.forEach((taskCard) => {
-    let shouldShow = true;
+  tasks.forEach((task) => {
+    const text = task
+      .querySelector(".main-content__task-card-text")
+      .textContent
+      .toLowerCase();
 
-    if (
-      value === "Completed" &&
-      !taskCard.classList.contains("main-content__task-card--completed")
-    ) {
-      shouldShow = false;
+    const isCompleted = task.classList.contains(
+      "main-content__task-card--completed"
+    );
+
+    const matchesSearch = text.includes(searchValue);
+
+    let matchesFilter = true;
+
+    if (filterValue === "Completed") {
+      matchesFilter = isCompleted;
     }
 
-    if (
-      value === "Active" &&
-      taskCard.classList.contains("main-content__task-card--completed")
-    ) {
-      shouldShow = false;
+    if (filterValue === "Active") {
+      matchesFilter = !isCompleted;
     }
 
-    taskCard.style.display = shouldShow ? "flex" : "none";
+    const shouldShow = matchesSearch && matchesFilter;
+
+    task.style.display = shouldShow ? "flex" : "none";
   });
 }
 
-filter.addEventListener("change", (e) => {
-  applyFilter(e.target.value);
-});
+
+// EVENTS
+filter.addEventListener("change", applyFilters);
+searchInput.addEventListener("input", applyFilters);
+
+
+// PROGRESS BAR
+const progressFill = document.querySelector(".main-content__progress-fill");
+const progressText = document.querySelector(".main-content__progress-info-text");
+const progressPercentage = document.querySelector(".main-content__progress-info-percentage");
+
+function updateProgress() {
+  const tasks = document.querySelectorAll(".main-content__task-card");
+  let completedCount = 0;
+
+  tasks.forEach(task => {
+    const checkbox = task.querySelector(".main-content__task-card-checkbox");
+
+    if (checkbox && checkbox.checked) {
+      completedCount++;
+    }
+  });
+
+  const totalTasks = tasks.length;
+
+  const progressPercent =
+    totalTasks === 0 ? 0 : Math.round((completedCount / totalTasks) * 100);
+
+  progressFill.style.width = `${progressPercent}%`;
+  progressText.textContent =
+    `${completedCount} of ${totalTasks} tasks completed`;
+  progressPercentage.textContent = `${progressPercent}%`;
+}
+
+updateProgress();
