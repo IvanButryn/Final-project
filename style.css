@@ -277,3 +277,45 @@ body {
   height: 100%;
   background: #10b981;
 }
+
+/* Category Select */
+
+.main-content__task-category-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  padding: 10px 14px;
+  border-radius: 10px;
+
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+
+  min-width: 140px;
+}
+
+.main-content__task-category-select:hover {
+  border-color: #6366f1;
+}
+
+.main-content__task-category-select:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.main-content__task-category-select {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D'http://www.w3.org/2000/svg'%20width%3D'20'%20height%3D'20'%20viewBox%3D'0%200%2020%2020'%3E%3Cpath%20fill%3D'%23666'%20d%3D'M5%207l5%205%205-5H5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 35px;
+}

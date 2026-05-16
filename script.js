@@ -2,11 +2,38 @@ const taskInput = document.querySelector(".main-content__task-input");
 const addTaskBtn = document.getElementById("add-task-btn");
 const taskContainer = document.querySelector(".main-content__tasks-container");
 
+const categorySelect = document.querySelector(".main-content__task-category-select");
 const filter = document.querySelector(".main-content__filter-select");
 const searchInput = document.querySelector(".main-content__search-input");
 
-// Adding tasks functionality
-addTaskBtn.addEventListener("click", () => {
+addTaskBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  if (taskInput.value.trim() === "") {
+    alert("Enter a task");
+    return;
+  }
+
+  const category = categorySelect.value;
+
+  let tagText = category;
+  let tagClass = "";
+
+  if (category === "work") {
+    tagText = "Work";
+    tagClass = "main-content__task-card-tag--work";
+  }
+
+  if (category === "personal") {
+    tagText = "Personal";
+    tagClass = "main-content__task-card-tag--personal";
+  }
+
+  if (category === "study") {
+    tagText = "Study";
+    tagClass = "main-content__task-card-tag--study";
+  }
+
   const taskCard = document.createElement("div");
   taskCard.classList.add("main-content__task-card");
 
@@ -29,7 +56,10 @@ addTaskBtn.addEventListener("click", () => {
 
   const tag = document.createElement("span");
   tag.classList.add("main-content__task-card-tag");
-  tag.textContent = "Work";
+
+  if (tagClass) tag.classList.add(tagClass);
+
+  tag.textContent = tagText;
 
   const deleteBtn = document.createElement("button");
   deleteBtn.classList.add("main-content__task-card-delete-btn");
@@ -43,6 +73,7 @@ addTaskBtn.addEventListener("click", () => {
 
   taskContainer.appendChild(taskCard);
 
+  saveTasks();
   applyFilters();
   updateProgress();
 
@@ -52,6 +83,7 @@ addTaskBtn.addEventListener("click", () => {
 taskContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("main-content__task-card-delete-btn")) {
     e.target.closest(".main-content__task-card").remove();
+    saveTasks();
     applyFilters();
     updateProgress();
   }
@@ -59,85 +91,132 @@ taskContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("main-content__task-card-checkbox")) {
     const taskCard = e.target.closest(".main-content__task-card");
 
-    if (e.target.checked) {
-      taskCard.classList.add("main-content__task-card--completed");
-    } else {
-      taskCard.classList.remove("main-content__task-card--completed");
-    }
+    taskCard.classList.toggle("main-content__task-card--completed", e.target.checked);
 
+    saveTasks();
     applyFilters();
     updateProgress();
   }
 });
 
-
-// FILTER + SEARCH TOGETHER
+// FILTER + SEARCH
 function applyFilters() {
   const searchValue = searchInput.value.toLowerCase();
   const filterValue = filter.value;
 
-  const tasks = document.querySelectorAll(".main-content__task-card");
-
-  tasks.forEach((task) => {
-    const text = task
-      .querySelector(".main-content__task-card-text")
-      .textContent
-      .toLowerCase();
-
-    const isCompleted = task.classList.contains(
-      "main-content__task-card--completed"
-    );
+  document.querySelectorAll(".main-content__task-card").forEach((task) => {
+    const text = task.querySelector(".main-content__task-card-text").textContent.toLowerCase();
+    const isCompleted = task.classList.contains("main-content__task-card--completed");
 
     const matchesSearch = text.includes(searchValue);
 
     let matchesFilter = true;
 
-    if (filterValue === "Completed") {
-      matchesFilter = isCompleted;
-    }
+    if (filterValue === "Completed") matchesFilter = isCompleted;
+    if (filterValue === "Active") matchesFilter = !isCompleted;
 
-    if (filterValue === "Active") {
-      matchesFilter = !isCompleted;
-    }
-
-    const shouldShow = matchesSearch && matchesFilter;
-
-    task.style.display = shouldShow ? "flex" : "none";
+    task.style.display = matchesSearch && matchesFilter ? "flex" : "none";
   });
 }
 
-
-// EVENTS
 filter.addEventListener("change", applyFilters);
 searchInput.addEventListener("input", applyFilters);
 
-
-// PROGRESS BAR
+// PROGRESS
 const progressFill = document.querySelector(".main-content__progress-fill");
 const progressText = document.querySelector(".main-content__progress-info-text");
 const progressPercentage = document.querySelector(".main-content__progress-info-percentage");
 
 function updateProgress() {
   const tasks = document.querySelectorAll(".main-content__task-card");
-  let completedCount = 0;
+  const completed = document.querySelectorAll(".main-content__task-card--completed").length;
 
-  tasks.forEach(task => {
-    const checkbox = task.querySelector(".main-content__task-card-checkbox");
+  const total = tasks.length;
+  const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
 
-    if (checkbox && checkbox.checked) {
-      completedCount++;
-    }
-  });
-
-  const totalTasks = tasks.length;
-
-  const progressPercent =
-    totalTasks === 0 ? 0 : Math.round((completedCount / totalTasks) * 100);
-
-  progressFill.style.width = `${progressPercent}%`;
-  progressText.textContent =
-    `${completedCount} of ${totalTasks} tasks completed`;
-  progressPercentage.textContent = `${progressPercent}%`;
+  progressFill.style.width = percent + "%";
+  progressText.textContent = `${completed} of ${total} tasks completed`;
+  progressPercentage.textContent = percent + "%";
 }
 
-updateProgress();
+// LOCAL STORAGE
+function saveTasks() {
+  const tasks = [];
+
+  document.querySelectorAll(".main-content__task-card").forEach((task) => {
+    const text = task.querySelector(".main-content__task-card-text").textContent;
+    const isCompleted = task.classList.contains("main-content__task-card--completed");
+
+    const tag = task.querySelector(".main-content__task-card-tag");
+    const tagText = tag.textContent;
+
+    let tagType = "";
+
+    if (tag.classList.contains("main-content__task-card-tag--work")) tagType = "work";
+    if (tag.classList.contains("main-content__task-card-tag--personal")) tagType = "personal";
+    if (tag.classList.contains("main-content__task-card-tag--study")) tagType = "study";
+
+    tasks.push({ text, isCompleted, tagText, tagType });
+  });
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function loadTasks() {
+  const data = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  taskContainer.innerHTML = "";
+
+  data.forEach((task) => {
+    const taskCard = document.createElement("div");
+    taskCard.classList.add("main-content__task-card");
+
+    if (task.isCompleted) {
+      taskCard.classList.add("main-content__task-card--completed");
+    }
+
+    const left = document.createElement("div");
+    left.classList.add("main-content__task-card-left");
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.classList.add("main-content__task-card-checkbox");
+    checkbox.checked = task.isCompleted;
+
+    const text = document.createElement("p");
+    text.classList.add("main-content__task-card-text");
+    text.textContent = task.text;
+
+    left.appendChild(checkbox);
+    left.appendChild(text);
+
+    const right = document.createElement("div");
+    right.classList.add("main-content__task-card-right");
+
+    const tag = document.createElement("span");
+    tag.classList.add("main-content__task-card-tag");
+
+    if (task.tagType) {
+      tag.classList.add(`main-content__task-card-tag--${task.tagType}`);
+    }
+
+    tag.textContent = task.tagText;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.classList.add("main-content__task-card-delete-btn");
+    deleteBtn.textContent = "🗑️";
+
+    right.appendChild(tag);
+    right.appendChild(deleteBtn);
+
+    taskCard.appendChild(left);
+    taskCard.appendChild(right);
+
+    taskContainer.appendChild(taskCard);
+  });
+
+  applyFilters();
+  updateProgress();
+}
+
+loadTasks();
