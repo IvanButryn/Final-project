@@ -35,34 +35,34 @@
           <div class="sidebar__list-item sidebar__list-item--active">
             <span class="sidebar__list-item-icon">☀️</span>
             <span class="sidebar__list-item-name">Today</span>
-            <span class="sidebar__list-item-count">5</span>
+            <span id="today-count" class="sidebar__list-item-count">0</span>
           </div>
 
           <div class="sidebar__list-item">
             <span class="sidebar__list-item-icon">💼</span>
             <span class="sidebar__list-item-name">Work</span>
-            <span class="sidebar__list-item-count">8</span>
+            <span id="work-count" class="sidebar__list-item-count">0</span>
           </div>
 
           <div class="sidebar__list-item">
             <span class="sidebar__list-item-icon">📚</span>
             <span class="sidebar__list-item-name">Study</span>
-            <span class="sidebar__list-item-count">4</span>
+            <span id="study-count" class="sidebar__list-item-count">0</span>
           </div>
 
           <div class="sidebar__list-item">
-            <span class="sidebar__list-item-icon">🛒</span>
-            <span class="sidebar__list-item-name">Shopping</span>
-            <span class="sidebar__list-item-count">3</span>
+            <span class="sidebar__list-item-icon">👤</span>
+            <span class="sidebar__list-item-name">Personal</span>
+            <span id="personal-count" class="sidebar__list-item-count">0</span>
           </div>
-
-          <button class="sidebar__add-list-btn">+ Add New List</button>
         </div>
 
         <div class="sidebar__bottom">
-          <button class="sidebar__btn">🌙 Dark Mode</button>
+          <button id="dark-mode-btn" class="sidebar__btn">🌙 Dark Mode</button>
 
-          <button class="sidebar__btn">⚙️ Settings</button>
+          <button id="clear-storage-btn" class="sidebar__btn">
+            ♻️ Reset Tasks
+          </button>
         </div>
       </aside>
 
@@ -194,5 +194,16 @@
       </main>
     </div>
     <script src="script.js"></script>
+    <div class="modal-overlay hidden" id="reset-modal">
+      <div class="modal">
+        <h3>Reset all tasks?</h3>
+        <p>This action will delete all tasks permanently.</p>
+
+        <div class="modal-actions">
+          <button id="cancel-reset">Cancel</button>
+          <button id="confirm-reset">Reset</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
