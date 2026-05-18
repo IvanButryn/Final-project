@@ -1,8 +1,11 @@
 const taskInput = document.querySelector(".main-content__task-input");
 const addTaskBtn = document.getElementById("add-task-btn");
 const taskContainer = document.querySelector(".main-content__tasks-container");
+let activeCategory = "Today";
 
-const categorySelect = document.querySelector(".main-content__task-category-select");
+const categorySelect = document.querySelector(
+  ".main-content__task-category-select",
+);
 const filter = document.querySelector(".main-content__filter-select");
 const searchInput = document.querySelector(".main-content__search-input");
 
@@ -96,7 +99,7 @@ taskContainer.addEventListener("click", (e) => {
 
     taskCard.classList.toggle(
       "main-content__task-card--completed",
-      e.target.checked
+      e.target.checked,
     );
 
     saveTasks();
@@ -139,17 +142,23 @@ function applyFilters() {
       .textContent.toLowerCase();
 
     const isCompleted = task.classList.contains(
-      "main-content__task-card--completed"
+      "main-content__task-card--completed",
     );
+
+    const tag = task.querySelector(".main-content__task-card-tag");
+    const tagName = tag ? tag.textContent.trim() : "";
 
     const matchesSearch = text.includes(searchValue);
 
     let matchesFilter = true;
-
     if (filterValue === "Completed") matchesFilter = isCompleted;
     if (filterValue === "Active") matchesFilter = !isCompleted;
 
-    task.style.display = matchesSearch && matchesFilter ? "flex" : "none";
+    let matchesCategory =
+      activeCategory === "Today" || tagName === activeCategory;
+
+    task.style.display =
+      matchesSearch && matchesFilter && matchesCategory ? "flex" : "none";
   });
 }
 
@@ -158,13 +167,17 @@ searchInput.addEventListener("input", applyFilters);
 
 // PROGRESS
 const progressFill = document.querySelector(".main-content__progress-fill");
-const progressText = document.querySelector(".main-content__progress-info-text");
-const progressPercentage = document.querySelector(".main-content__progress-info-percentage");
+const progressText = document.querySelector(
+  ".main-content__progress-info-text",
+);
+const progressPercentage = document.querySelector(
+  ".main-content__progress-info-percentage",
+);
 
 function updateProgress() {
   const tasks = document.querySelectorAll(".main-content__task-card");
   const completed = document.querySelectorAll(
-    ".main-content__task-card--completed"
+    ".main-content__task-card--completed",
   ).length;
 
   const total = tasks.length;
@@ -190,7 +203,8 @@ function updateSidebarCounts() {
     if (!tag) return;
 
     if (tag.classList.contains("main-content__task-card-tag--work")) work++;
-    if (tag.classList.contains("main-content__task-card-tag--personal")) personal++;
+    if (tag.classList.contains("main-content__task-card-tag--personal"))
+      personal++;
     if (tag.classList.contains("main-content__task-card-tag--study")) study++;
   });
 
@@ -210,9 +224,11 @@ function saveTasks() {
   const tasks = [];
 
   document.querySelectorAll(".main-content__task-card").forEach((task) => {
-    const text = task.querySelector(".main-content__task-card-text").textContent;
+    const text = task.querySelector(
+      ".main-content__task-card-text",
+    ).textContent;
     const isCompleted = task.classList.contains(
-      "main-content__task-card--completed"
+      "main-content__task-card--completed",
     );
 
     const tag = task.querySelector(".main-content__task-card-tag");
@@ -353,3 +369,54 @@ const savedTheme = localStorage.getItem("theme");
 if (savedTheme === "dark") {
   document.body.classList.add("dark-mode");
 }
+
+// SIDEBAR CATEGORIES FUNCTIONAL
+
+const categorySidebar = document.querySelectorAll(".sidebar__list-item");
+const textThatHaveToBeChngd = document.querySelector(".main-content__title");
+
+categorySidebar.forEach((cat) => {
+  cat.addEventListener("click", () => {
+    const categoryName = cat
+      .querySelector(".sidebar__list-item-name")
+      .textContent.trim();
+
+    activeCategory = categoryName;
+
+    if (categoryName === "Work") {
+      textThatHaveToBeChngd.textContent = "💼 Work";
+    } else if (categoryName === "Personal") {
+      textThatHaveToBeChngd.textContent = "👤 Personal";
+    } else if (categoryName === "Study") {
+      textThatHaveToBeChngd.textContent = "📚 Study";
+    } else {
+      textThatHaveToBeChngd.textContent = "☀️ Today";
+    }
+  });
+});
+
+// this part changes tasks depending on category
+categorySidebar.forEach((cat) => {
+  cat.addEventListener("click", () => {
+    categorySidebar.forEach((c) => c.classList.remove("sidebar__list-item--active"));
+    cat.classList.add("sidebar__list-item--active");
+    const categoryName = cat
+      .querySelector(".sidebar__list-item-name")
+      .textContent.trim();
+
+    const tasks = document.querySelectorAll(".main-content__task-card");
+
+    tasks.forEach((task) => {
+      const tag = task.querySelector(".main-content__task-card-tag");
+
+      if (categoryName === "Today") {
+        task.style.display = "flex";
+        return;
+      }
+
+      const tagName = tag ? tag.textContent.trim() : "";
+
+      task.style.display = tagName === categoryName ? "flex" : "none";
+    });
+  });
+});
